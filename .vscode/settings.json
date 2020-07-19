@@ -1,0 +1,13 @@
+{
+    "python.pythonPath": ".venv/bin/python",
+    "python.linting.pylintEnabled": true,
+    "python.linting.pylintPath": "/home/jovana/.local/bin/pylint",
+    "python.autoComplete.extraPaths": [
+        "/home/jovana/.local/bin/flask",
+        "/home/jovana/.local/bin/flask_restful",
+        "/home/jovana/.local/bin/spacy",
+        "/home/jovana/.local/lib/python3.8/site-packages"
+    ],
+    "python.linting.pycodestyleEnabled": true,
+    "python.linting.enabled": true
+}

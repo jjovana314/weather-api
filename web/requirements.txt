@@ -1,0 +1,6 @@
+flask_restful
+Flask
+pymongo
+Werkzeug
+requests
+bcrypt
