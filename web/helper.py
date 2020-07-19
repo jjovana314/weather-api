@@ -7,32 +7,28 @@ import bcrypt
 # ! repeatable code
 
 
-def convert_to_celsius(array_temp: list) -> list:
-    """ Convert temperature from Kelvin to Celsius.
+def convert_temperature(temp_array: list, to_celsius=False) -> list:
+    """ Convert temperature from Kelvin to Fahrenheit or Celsius.
 
     Args:
         temp_to_conv (list): temperatures to convert
 
-    Returns:
-        array with string temperatures in Celsius.
-    """
-    temp_return = [temp - 273.15 for temp in array_temp]
-    t_string = ["{:.2f}".format(round(t, 2)) for t in temp_return]
-    return t_string
-
-
-def convert_to_fahrenheit(temp_array: list) -> list:
-    """ Convert temperature from Kelvin to Fahrenheit.
-
-    Args:
-        temp_to_conv (list): temperatures to convert
+    Kwargs:
+        to_celsius (bool): True if we want to convert temperature to Celsius.
+                           Defauilt is False.
 
     Returns:
-        array with string temperature in Fahrenheit.
+        array with converted temperature formated as string.
     """
-    temp_return = [(temp - 273.15) * 9/5 + 32 for temp in temp_array]
-    t_string = ["{:.2f}".format(round(t, 2)) for t in temp_return]
-    return t_string
+    if to_celsius:
+        converted_temp = [temp - 273.15 for temp in temp_array]
+    else:
+        # converting to Fahrenheit
+        converted_temp = [(temp - 273.15) * 9/5 + 32 for temp in temp_array]
+
+    temp_formated = ["{:.2f}".format(round(temp, 2))
+                         for temp in converted_temp]
+    return temp_formated
 
 
 def change_keys_weather(
@@ -51,10 +47,6 @@ def change_keys_weather(
                  "Feels like"]
     for i in range(4):
         temp_dict[temp_keys[i]] = array_values[i]
-    # temp_dict["Temperature"] = array_values[0]
-    # temp_dict["Minimum temperature"] = array_values[1]
-    # temp_dict["Maximum temperature"] = array_values[2]
-    # temp_dict["Feels like"] = array_values[3]
 
 
 def validation_keys(valid_keys: list, keys: list, code: int) -> None:
@@ -108,7 +100,7 @@ def validation_password(
         }
     )[0]["Password"]
     hashed_pw = bcrypt.hashpw(password.encode("utf8"), password_db)
-    return password_db != hashed_pw:
+    return password_db != hashed_pw
 
 
 def count_tokens(users: MongoClient, username: str) -> int:
@@ -251,10 +243,12 @@ def validate_temp(format_temp, temp_to_convert, weather_return):
         ValueError: if format_temp is not 'C' or 'F'' or 'K'
     """
     if format_temp == "C":
-        temp_to_convert = convert_to_celsius(temp_to_convert)
+        temp_to_convert = convert_temperature(
+            temp_to_convert, to_celsius=True
+        )
         change_keys_weather(weather_return, temp_to_convert)
     elif format_temp == "F":
-        temp_to_convert = convert_to_fahrenheit(temp_to_convert)
+        temp_to_convert = convert_temperature(temp_to_convert)
         change_keys_weather(weather_return, temp_to_convert)
 
     if format_temp != "F" and format_temp != "C" and format_temp != "K":
