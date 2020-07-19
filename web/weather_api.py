@@ -23,15 +23,6 @@ client = MongoClient("mongodb://db:27017")
 db = client.WeatherDB
 users = db["Users"]
 
-# status codes
-OK = HTTPStatus.OK
-INVALID_USERNAME = 301
-INVALID_PASSWORD = 302
-OUT_OF_TOKENS = 303
-DATA_NOT_EXIST = 304
-INVALID_ADMIN_PASSWORD = 305
-KEYS_NOT_VALID = 306
-
 # some global variables
 tokens_start = 10
 
@@ -52,45 +43,33 @@ class Register(Resource):
             BaseResponse object with message and code
         """
         data = request.get_json()
-        data_keys_list = list(data.keys())
-        try:
-            helper.validation_keys(
-                data_keys_list, register_keys_valid, KEYS_NOT_VALID
-            )
-        except KeyError as ex:
-            return jsonify({"Message": ex.args[0], "Code": ex.args[1]})
-
+        # data_keys_list = list(data.keys())
+        is_valid, msg, code = helper.user_validation(
+            users, data, register_keys_valid, is_register=True
+        )
+        if not is_valid:
+            return jsonify({"Message": msg,"Code": code})
         username = data["username"]
         password = data["password"]
 
         try:
             username = helper.validate_type(
-                username, "username", str, ValueError, INVALID_USERNAME,
-                min_error=min_username,
-                min_=username_length
+                username, "username", str,
+                ValueError, helper.INVALID_USERNAME,
+                min_error=min_username, min_=username_length
             )
         except ValueError as ex:
             return jsonify({"Message": ex.args[0], "Code": ex.args[1]})
 
         try:
-            # make sure that password is string with valid number
-            # of characters
             password = helper.validate_type(
-                password, "password", str, ValueError, INVALID_PASSWORD,
-                min_error=min_password,
-                min_=password_length
+                password, "password", str,
+                ValueError, helper.INVALID_PASSWORD,
+                min_error=min_password, min_=password_length
             )
         except ValueError as ex:
-            return jsonify({"Message": ex.args[0], "Code": ex.args[1]})
+            return jsonify({"Message": ex.args[0], "Code": code.args[1]})
 
-        exist_usr = helper.username_exist(users, username)
-        if exist_usr:
-            return jsonify(
-                {
-                    "Message": "This username already exist.",
-                    "Code": INVALID_USERNAME
-                }
-            )
         # hash password
         hashed_pw = bcrypt.hashpw(password.encode("utf8"), bcrypt.gensalt())
         # add user to database
@@ -104,7 +83,7 @@ class Register(Resource):
         return jsonify(
             {
                 "Messagee": "You signed up successfully.",
-                "Code": OK
+                "Code": helper.OK
             }
         )
 
@@ -128,43 +107,22 @@ class Weather(Resource):
             BaseResponse object with message and code
         """
         data = request.get_json()
-        data_list_keys = list(data.keys())
-
-        # make sure that we have all keys that we need
-        try:
-            helper.validation_keys(
-                weather_keys_valid, data_list_keys, KEYS_NOT_VALID
-            )
-        except KeyError as ex:
-            return jsonify({"Message": ex.args[0], "Code": ex.args[1]})
 
         # if we do, than we can take values that is sent
+        is_valid, msg, code = helper.user_validation(
+            users, data, weather_keys_valid, is_register=False
+        )
+        if not is_valid:
+            return jsonify({"Message": msg, "Code": code})
+
         city = data["city"]
         username = data["username"]
-        password = data["password"]
         format_temp = str(data["format_temperature"]).upper()
-
-        user_exist = helper.username_exist(users, username)
-        if not user_exist:
-            return jsonify(
-                {
-                    "Message": "Username you entered does not exist.",
-                    "Code": INVALID_USERNAME
-                }
-            )
-        pwd_valid = helper.validation_password(users, password, username)
-        if not pwd_valid:
-            return jsonify(
-                {
-                    "Message": "Password you entered is not valid",
-                    "Code": INVALID_PASSWORD
-                }
-            )
         if helper.count_tokens(users, username) <= 0:
             return jsonify(
                 {
                     "Message": "You are out of tokens, please refill.",
-                    "Code": OUT_OF_TOKENS
+                    "Code": helper.OUT_OF_TOKENS
                 }
             )
 
@@ -176,18 +134,14 @@ class Weather(Resource):
         # validate that city and counrry exist
         try:
             all_values = helper.validate_city_and_country(
-                data_return, DATA_NOT_EXIST
+                data_return, helper.DATA_NOT_EXIST
             )
         except KeyError as ex:
             return jsonify({"Message": ex.args[0], "Code": ex.args[1]})
 
         weather_return = dict(zip(keys_weather_return, all_values))
-        temp_to_convert = [weather_return["Temperature"],
-                           weather_return["Minimum temperature"],
-                           weather_return["Maximum temperature"],
-                           weather_return["Feels like"]]
+        temp_to_convert = [weather_return[key] for key in weather_return[:4]]
 
-        # this can be put in a function
         try:
             temp_to_convert = helper.validate_temp(
                 format_temp, temp_to_convert, weather_return
@@ -197,7 +151,7 @@ class Weather(Resource):
                 {
                     "Message": ("For temperature in Celsius send 'C', "
                                 "for temperature in Fahrenheit send 'F'."),
-                    "Code": KEYS_NOT_VALID
+                    "Code": helper.KEYS_NOT_VALID
                 }
             )
 
@@ -210,7 +164,7 @@ class Weather(Resource):
                 {
                     f"This is weather for {city}": weather_return
                 },
-                "Code": OK
+                "Code": helper.OK
             }
         )
 
@@ -240,41 +194,15 @@ class Refill(Resource):
             }
         )
         data = request.get_json()
-        data_keys_list = list(data.keys())
-        # make sure that we have all keys that we need
-        try:
-            helper.validation_keys(
-                data_keys_list, refill_keys_valid, KEYS_NOT_VALID
-            )
-        except KeyError as ex:
-            return jsonify(
-                {
-                    "Message": ex.args[0],
-                    "Code": ex.args[1]
-                }
-            )
-        # get data from user
+        is_valid, msg, code = helper.user_validation(
+            users, data, refill_keys_valid, is_register=False
+        )
+        if not is_valid:
+            return jsonify({"Message": msg, "Code": code})
         username = data["username"]
         admin_password = data["admin_pwd"]
         amout_tokens = data["amout"]
-        # validate admin's password
-        validation = helper.validation_password(
-            users, admin_password, admin_name
-        )
-        if not validation:
-            return jsonify(
-                {
-                    "Message": "Admin password is not valid!",
-                    "Code": INVALID_ADMIN_PASSWORD
-                }
-            )
-        if not helper.username_exist(users, username):
-            return jsonify(
-                {
-                    "Message": "This username does not exist.",
-                    "Code": INVALID_USERNAME
-                }
-            )
+
         # refill tokens
         helper.update_tokens(
             users, username, add, amout_tokens
@@ -282,7 +210,7 @@ class Refill(Resource):
         return jsonify(
             {
                 "Message": "Tokens updated successfully.",
-                "Code": OK
+                "Code": helper.OK
             }
         )
 

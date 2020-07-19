@@ -266,9 +266,25 @@ def validate_temp(format_temp, temp_to_convert, weather_return):
 
 def user_validation(
     users: MongoClient, data: dict, valid_keys: list,
-    is_register=False, tokens_update=False,
-    operation=None, amount=0
-) -> tuple:
+    is_register=False) -> tuple:
+    """ Validate data about user.
+
+    Args:
+        users (MongoClient): database
+        data (dict): data for validation
+        valid_keys (list): list with valid keys for validation
+
+    Kwargs:
+        is_register (bool): True if class caller is Register class.
+                            Default is False.
+
+    Returns:
+        tuple with status validation (True if data is valid,
+        False otherwise), second tuple element is None if
+        data is valid, otherwise it is message about error,
+        third tuple element is code if error occures, otherwise
+        it is OK code (200)
+    """
     keys = list(data.keys())
     try:
         validation_keys(valid_keys, keys, KEYS_NOT_VALID)
@@ -276,15 +292,17 @@ def user_validation(
         return (
             False, ex.args[0], ex.args[1]
         )
-    try:
-        username = data["username"]
-        password = data["password"]
-    except KeyError:
-        return (
-            False,
-            "Please enter username and password",
-            DATA_NOT_EXIST
-        )
+    password = data.get("admin_pwd", None)
+    if password is None:
+        try:
+            username = data["username"]
+            password = data["password"]
+        except KeyError:
+            return (
+                False,
+                "Please enter username and password",
+                DATA_NOT_EXIST
+            )
     usr_exist = username_exist(users, username)
     if is_register:
         if usr_exist:
@@ -301,8 +319,4 @@ def user_validation(
         return (
             False, "Please enter valid password", INVALID_PASSWORD
         )
-    if (tokens_update is True and
-        operation is not None and
-        amount > 0):
-        update_tokens(users, username, operation, amount)
     return True, None, OK
