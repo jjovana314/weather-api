@@ -5,7 +5,6 @@ from flask_restful import Api, Resource, request
 from pymongo import MongoClient
 from werkzeug.wrappers import BaseResponse
 from pprint import pprint
-from http import HTTPStatus
 from operator import add, sub
 import requests
 import json
@@ -171,7 +170,7 @@ class Weather(Resource):
 
 admin_pwd = "ad002.C2f"
 admin_name = "admin"
-refill_keys_valid = ["username", "admin_pwd", "amout"]
+refill_keys_valid = ["username", "admin_pwd", "amount"]
 # crypting admin's password and inserting into database
 admin_pwd_crypted = bcrypt.hashpw(
     admin_pwd.encode("utf8"), bcrypt.gensalt()
@@ -200,12 +199,11 @@ class Refill(Resource):
         if not is_valid:
             return jsonify({"Message": msg, "Code": code})
         username = data["username"]
-        admin_password = data["admin_pwd"]
-        amout_tokens = data["amout"]
+        amount_tokens = data["amount"]
 
         # refill tokens
         helper.update_tokens(
-            users, username, add, amout_tokens
+            users, username, add, amount_tokens
         )
         return jsonify(
             {

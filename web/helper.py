@@ -130,7 +130,7 @@ def count_tokens(users: MongoClient, username: str) -> int:
 
 
 def update_tokens(
-    users: MongoClient, username: str, operator_: object, amout: int
+    users: MongoClient, username: str, operator_: object, amount: int
 ) -> None:
     """ Updating tokens.
 
@@ -138,14 +138,14 @@ def update_tokens(
         users (MongoClient): database
         username (str): username
         operator_ (object): + or - for adding or removing tokens
-        amout (int): number of tokens that you want to add or remove
+        amount (int): number of tokens that you want to add or remove
     """
     num_tokens = users.find(
         {
             "Username": username
         }
     )[0]["Tokens"]
-    new_tokens_value = operator_(num_tokens, amout)
+    new_tokens_value = operator_(num_tokens, amount)
     users.update(
         {
             "Username": username
