@@ -1,10 +1,18 @@
 """ Helper for weather API. """
 
 from pymongo import MongoClient
+from http import HTTPStatus
 import bcrypt
 
 
-# ! repeatable code
+# status codes
+OK = HTTPStatus.OK
+INVALID_USERNAME = 301
+INVALID_PASSWORD = 302
+OUT_OF_TOKENS = 303
+DATA_NOT_EXIST = 304
+INVALID_ADMIN_PASSWORD = 305
+KEYS_NOT_VALID = 306
 
 
 def convert_temperature(temp_array: list, to_celsius=False) -> list:
@@ -254,3 +262,47 @@ def validate_temp(format_temp, temp_to_convert, weather_return):
     if format_temp != "F" and format_temp != "C" and format_temp != "K":
         raise ValueError
     return temp_to_convert
+
+
+def user_validation(
+    users: MongoClient, data: dict, valid_keys: list,
+    is_register=False, tokens_update=False,
+    operation=None, amount=0
+) -> tuple:
+    keys = list(data.keys())
+    try:
+        validation_keys(valid_keys, keys, KEYS_NOT_VALID)
+    except KeyError as ex:
+        return (
+            False, ex.args[0], ex.args[1]
+        )
+    try:
+        username = data["username"]
+        password = data["password"]
+    except KeyError:
+        return (
+            False,
+            "Please enter username and password",
+            DATA_NOT_EXIST
+        )
+    usr_exist = username_exist(users, username)
+    if is_register:
+        if usr_exist:
+            return (
+                False, "This username already exist", INVALID_USERNAME
+            )
+        return True, None, OK
+    if not usr_exist:
+        return (
+            False, "This user does not exist", INVALID_USERNAME
+        )
+    valid_pwd = validation_password(users, password, username)
+    if not valid_pwd:
+        return (
+            False, "Please enter valid password", INVALID_PASSWORD
+        )
+    if (tokens_update is True and
+        operation is not None and
+        amount > 0):
+        update_tokens(users, username, operation, amount)
+    return True, None, OK
