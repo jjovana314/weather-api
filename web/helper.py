@@ -19,14 +19,16 @@ def convert_temperature(temp_array: list, to_celsius=False) -> list:
     """ Convert temperature from Kelvin to Fahrenheit or Celsius.
 
     Args:
-        temp_to_conv (list): temperatures to convert
+        temp_array (list): temperatures to convert
+        to_celsius (bool): True if we want to convert temperature in Celsius.
+                            Default is False.
 
     Kwargs:
         to_celsius (bool): True if we want to convert temperature to Celsius.
-                           Defauilt is False.
+                           Default is False.
 
     Returns:
-        array with converted temperature formated as string.
+        array with converted temperature formatted as string.
     """
     if to_celsius:
         converted_temp = [temp - 273.15 for temp in temp_array]
@@ -34,9 +36,9 @@ def convert_temperature(temp_array: list, to_celsius=False) -> list:
         # converting to Fahrenheit
         converted_temp = [(temp - 273.15) * 9/5 + 32 for temp in temp_array]
 
-    temp_formated = ["{:.2f}".format(round(temp, 2))
-                         for temp in converted_temp]
-    return temp_formated
+    temp_formatted = ["{:.2f}".format(round(temp, 2))
+                     for temp in converted_temp]
+    return temp_formatted
 
 
 def change_keys_weather(
@@ -48,7 +50,7 @@ def change_keys_weather(
         temp_dict (dict): dictionary with data about temperature
         array_values (list): values that needs to replace
                              data about temperature
-        key_weather_return (list): keys for replacing
+        keys_weather_return (list): keys for replacing
 
     Note:
         length of array_values and keys_weather_return must be equal
@@ -97,7 +99,7 @@ def validation_password(
     Args:
         users (MongoClient): database
         password (str): password for validation
-        code (int): error code for exception
+        username (str): username
 
     Returns:
         bool: True if password is valid, False otherwise
