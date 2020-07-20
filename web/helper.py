@@ -40,7 +40,7 @@ def convert_temperature(temp_array: list, to_celsius=False) -> list:
 
 
 def change_keys_weather(
-    temp_dict: dict, array_values: list
+    temp_dict: dict, array_values: list, keys_weather_return: list
 ) -> None:
     """ Change keys from dictionary with data about temperature.
 
@@ -48,13 +48,13 @@ def change_keys_weather(
         temp_dict (dict): dictionary with data about temperature
         array_values (list): values that needs to replace
                              data about temperature
+        key_weather_return (list): keys for replacing
+
+    Note:
+        length of array_values and keys_weather_return must be equal
     """
-    temp_keys = ["Temperature",
-                 "Minimum temperature",
-                 "Maximum temperature",
-                 "Feels like"]
-    for i in range(4):
-        temp_dict[temp_keys[i]] = array_values[i]
+    for i in range(len(array_values)):
+        temp_dict[keys_weather_return[i]] = array_values[i]
 
 
 def validation_keys(valid_keys: list, keys: list, code: int) -> None:
@@ -206,12 +206,15 @@ def validate_type(
     return value
 
 
-def validate_city_and_country(data: dict, code: int) -> list:
+def validate_city_and_country(
+    data: dict, code: int, main_keys_valid: list
+) -> list:
     """ Make sure that city and country exist.
 
     Args:
         data (list): dictionary for validation
         code (int): code for exception if we don't find city and country
+        main_keys_valid (list): list with valid keys
 
     Raises:
         KeyError: if city or country that is sent is not valid
@@ -225,10 +228,9 @@ def validate_city_and_country(data: dict, code: int) -> list:
         raise KeyError(
             "We cannot found city you entered", code
         ) from None
-    main_values = [main_dict["temp"],
-                   main_dict["temp_min"],
-                   main_dict["temp_max"],
-                   main_dict["feels_like"]]
+
+    main_values = [main_dict[key] for key in main_keys_valid]
+
     weather_dict = data["weather"][0]
     wind_dict = data["wind"]
 
@@ -236,7 +238,9 @@ def validate_city_and_country(data: dict, code: int) -> list:
     return main_values + other_values
 
 
-def validate_temp(format_temp, temp_to_convert, weather_return):
+def validate_temp(
+    format_temp: str, temp_to_convert: float, weather_return: dict
+) -> float:
     """ Temperature validation.
 
     Args:
@@ -250,14 +254,19 @@ def validate_temp(format_temp, temp_to_convert, weather_return):
     Raises:
         ValueError: if format_temp is not 'C' or 'F'' or 'K'
     """
+    weather_keys = list(weather_return.keys())
     if format_temp == "C":
         temp_to_convert = convert_temperature(
             temp_to_convert, to_celsius=True
         )
-        change_keys_weather(weather_return, temp_to_convert)
+        change_keys_weather(
+            weather_return, temp_to_convert, weather_keys[:4]
+        )
     elif format_temp == "F":
         temp_to_convert = convert_temperature(temp_to_convert)
-        change_keys_weather(weather_return, temp_to_convert)
+        change_keys_weather(
+            weather_return, temp_to_convert, weather_keys[:4]
+        )
 
     if format_temp != "F" and format_temp != "C" and format_temp != "K":
         raise ValueError
@@ -294,6 +303,8 @@ def user_validation(
         )
     password = data.get("admin_pwd", None)
     if password is None:
+        # if password is not admin password we assume
+        # that it is user's password
         try:
             username = data["username"]
             password = data["password"]

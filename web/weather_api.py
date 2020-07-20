@@ -13,8 +13,7 @@ import bcrypt
 
 
 # TODO: test code
-# TODO: docstrings and comments
-# TODO: GET RID OF SPAGHETTI CODE
+
 
 app = Flask(__name__)
 api = Api(app)
@@ -133,7 +132,7 @@ class Weather(Resource):
         # validate that city and counrry exist
         try:
             all_values = helper.validate_city_and_country(
-                data_return, helper.DATA_NOT_EXIST
+                data_return, helper.DATA_NOT_EXIST, main_keys_valid
             )
         except KeyError as ex:
             return jsonify({"Message": ex.args[0], "Code": ex.args[1]})
