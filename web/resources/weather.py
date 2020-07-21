@@ -2,8 +2,8 @@ from flask_restful import Resource, request
 from flask import jsonify
 from werkzeug.wrappers import BaseResponse
 from operator import sub, add
-from db.db import users
-import web.helper as helper
+import requests
+import helper
 import bcrypt
 import json
 import config
@@ -22,7 +22,7 @@ class Weather(Resource):
 
         # if we do, than we can take values that is sent
         is_valid, msg, code = helper.user_validation(
-            users, data, config.weather_keys_valid, is_register=False
+            config.users, data, config.weather_keys_valid, is_register=False
         )
         if not is_valid:
             return jsonify({"Message": msg, "Code": code})
@@ -30,7 +30,7 @@ class Weather(Resource):
         city = data["city"]
         username = data["username"]
         format_temp = str(data["format_temperature"]).upper()
-        if helper.count_tokens(users, username) <= 0:
+        if helper.count_tokens(config.users, username) <= 0:
             return jsonify(
                 {
                     "Message": "You are out of tokens, please refill.",
@@ -68,7 +68,7 @@ class Weather(Resource):
             )
 
         # don't forget to take one token from user
-        helper.update_tokens(users, username, sub, 1)
+        helper.update_tokens(config.users, username, sub, 1)
         # finaly, return valid respond with OK status
         return jsonify(
             {
@@ -79,6 +79,3 @@ class Weather(Resource):
                 "Code": helper.OK
             }
         )
-
-
-__all__ = ["Weather"]

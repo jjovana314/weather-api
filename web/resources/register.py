@@ -1,8 +1,7 @@
 from flask_restful import Resource, request
 from flask import jsonify
 from werkzeug.wrappers import BaseResponse
-from db.db import users
-import web.helper as helper
+import helper
 import bcrypt
 import config
 

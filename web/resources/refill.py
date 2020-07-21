@@ -1,10 +1,9 @@
-import web.helper as helper
+import helper
 import config
 from flask import jsonify
 from flask_restful import request, Resource
 from werkzeug.wrappers import BaseResponse
 from operator import add
-from db.db import users
 
 
 class Refill(Resource):
@@ -24,7 +23,7 @@ class Refill(Resource):
         )
         data = request.get_json()
         is_valid, msg, code = helper.user_validation(
-            users, data, config.refill_keys_valid, is_register=False
+            config.users, data, config.refill_keys_valid, is_register=False
         )
         if not is_valid:
             return jsonify({"Message": msg, "Code": code})
@@ -33,7 +32,7 @@ class Refill(Resource):
 
         # refill tokens
         helper.update_tokens(
-            users, username, add, amount_tokens
+            config.users, username, add, amount_tokens
         )
         return jsonify(
             {
