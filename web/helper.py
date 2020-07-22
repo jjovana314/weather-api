@@ -182,8 +182,8 @@ def validate_type(
 
     Raises:
         exception_: if value is not valid type
-        exception_: if value or length of value is less then minumum
-        exception_: if value or length of value is greater then maximum
+                    if value or length of value is less then minumum
+                    if value or length of value is greater then maximum
 
     Returns:
         object: value if it's passed validation
