@@ -15,7 +15,7 @@ class Refill(Resource):
             BaseResponse object with message and code
         """
         # add admin's password and username to database
-        users.insert(
+        config.users.insert(
             {
                 "Username": config.admin_name,
                 "Password": config.admin_pwd_crypted

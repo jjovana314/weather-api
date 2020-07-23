@@ -17,7 +17,7 @@ class Register(Resource):
         data = request.get_json()
         # data_keys_list = list(data.keys())
         is_valid, msg, code = helper.user_validation(
-            users, data, config.register_keys_valid, is_register=True
+            config.users, data, config.register_keys_valid, is_register=True
         )
         if not is_valid:
             return jsonify({"Message": msg,"Code": code})
@@ -45,7 +45,7 @@ class Register(Resource):
         # hash password
         hashed_pw = bcrypt.hashpw(password.encode("utf8"), bcrypt.gensalt())
         # add user to database
-        users.insert(
+        config.users.insert(
             {
                 "Username": username,
                 "Password": hashed_pw,
@@ -58,4 +58,3 @@ class Register(Resource):
                 "Code": helper.OK
             }
         )
-

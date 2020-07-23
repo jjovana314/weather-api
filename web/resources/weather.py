@@ -52,7 +52,7 @@ class Weather(Resource):
             return jsonify({"Message": ex.args[0], "Code": ex.args[1]})
 
         weather_return = dict(zip(config.keys_weather_return, all_values))
-        temp_to_convert = [weather_return[key] for key in weather_return[:4]]
+        temp_to_convert = [weather_return[key] for key in list(weather_return.keys())[:4]]
 
         try:
             temp_to_convert = helper.validate_temp(

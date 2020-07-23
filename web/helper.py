@@ -110,7 +110,7 @@ def validation_password(
         }
     )[0]["Password"]
     hashed_pw = bcrypt.hashpw(password.encode("utf8"), password_db)
-    return password_db != hashed_pw
+    return password_db == hashed_pw
 
 
 def count_tokens(users: MongoClient, username: str) -> int:
@@ -317,19 +317,23 @@ def user_validation(
                 DATA_NOT_EXIST
             )
     usr_exist = username_exist(users, username)
+    # if user needs to be registered in database
     if is_register:
         if usr_exist:
             return (
                 False, "This username already exist", INVALID_USERNAME
             )
         return True, None, OK
-    if not usr_exist:
-        return (
-            False, "This user does not exist", INVALID_USERNAME
-        )
-    valid_pwd = validation_password(users, password, username)
-    if not valid_pwd:
-        return (
-            False, "Please enter valid password", INVALID_PASSWORD
-        )
+    # if user tries to login or check weather
+    else:
+        if not usr_exist:
+            return (
+                False, "This user does not exist", INVALID_USERNAME
+            )
+        # validate password if user does not wants to register
+        valid_pwd = validation_password(users, password, username)
+        if not valid_pwd:
+            return (
+                False, "Please enter valid password", INVALID_PASSWORD
+            )
     return True, None, OK
