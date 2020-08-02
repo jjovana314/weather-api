@@ -5,6 +5,7 @@ import bcrypt
 
 
 app = Flask(__name__)
+app.secret_key = b"@\xe4\x82+{\xed)~\x92\x84K\x11:)\x95\xf4"
 api = Api(app)
 
 client = MongoClient("mongodb://db:27017")
