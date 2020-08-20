@@ -2,9 +2,11 @@
 
 from pymongo import MongoClient
 from http import HTTPStatus
+from jsonschema import validate, ValidationError
+from json import dumps, loads
 import bcrypt
 import exceptions
-import exceotion_messages as ex_m
+import exception_messages as ex_m
 
 
 # status codes
@@ -17,6 +19,29 @@ INVALID_ADMIN_PASSWORD = 305
 KEYS_NOT_VALID = 306
 
 # todo: do the schema validation
+def schema_validation(schema: dict, data: dict) -> None:
+        """ JSON schema validation.
+
+    Arguments:
+        schema {dict} -- valid dictionary
+        data {dict} -- dictionary for validation
+
+    Raises:
+        SchemaError: if data dictionary is not valid
+    """
+    # we want json data, so we have to dump our data into json string
+    data = dumps(data)
+    try:
+        # try to do validation for our json data
+        validate(loads(data), schema)
+    except ValidationError as ex:
+        # ! here we do not except JSONDecodeError, remember that!
+        ex_str = str(ex)
+        for idx, value in enumerate(ex_m.schema_errors):
+            # create appropriate message for user
+            # if there is exception occured
+            if value in ex_str:
+                raise ex_m.schema_exceptions[idx](ex_m.error_messages[idx])
 
 
 def convert_temperature(temp_array: list, to_celsius=False) -> list:
