@@ -3,6 +3,8 @@
 from pymongo import MongoClient
 from http import HTTPStatus
 import bcrypt
+import exceptions
+import exceotion_messages as ex_m
 
 
 # status codes
@@ -13,6 +15,8 @@ OUT_OF_TOKENS = 303
 DATA_NOT_EXIST = 304
 INVALID_ADMIN_PASSWORD = 305
 KEYS_NOT_VALID = 306
+
+# todo: do the schema validation
 
 
 def convert_temperature(temp_array: list, to_celsius=False) -> list:
