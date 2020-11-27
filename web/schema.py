@@ -37,9 +37,6 @@ refill = {
         "username": {
             "type": "string", "minLength": 3, "maxLength": 20
         },
-        "password": {
-            "type": "string", "minLength": 7, "maxLength": 20
-        },
         "admin_pwd": {
             "type": "string", "minLength": 9, "maxLength": 9
         },
