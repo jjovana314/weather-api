@@ -18,9 +18,9 @@ DATA_NOT_EXIST = 304
 INVALID_ADMIN_PASSWORD = 305
 KEYS_NOT_VALID = 306
 
-# todo: do the schema validation
+
 def schema_validation(schema: dict, data: dict) -> None:
-        """ JSON schema validation.
+    """ JSON schema validation.
 
     Arguments:
         schema {dict} -- valid dictionary
