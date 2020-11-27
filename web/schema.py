@@ -19,9 +19,6 @@ weather = {
         "password": {
             "type": "string", "minLength": 7, "maxLength": 20
         },
-        "country": {
-            "type": "string", "minLength": 2, "maxLength": 50
-        },
         "city": {
             "type": "string", "minLength": 2, "maxLength": 50
         },
