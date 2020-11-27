@@ -40,7 +40,7 @@ class Register(Resource):
                 min_error=config.min_password, min_=config.password_length
             )
         except ValueError as ex:
-            return jsonify({"Message": ex.args[0], "Code": code.args[1]})
+            return jsonify({"Message": ex.args[0], "Code": ex.args[1]})
 
         # hash password
         hashed_pw = bcrypt.hashpw(password.encode("utf8"), bcrypt.gensalt())
