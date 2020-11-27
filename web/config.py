@@ -18,8 +18,8 @@ tokens_start = 10
 
 password_length = 8
 username_length = 5
-min_username = f"Useranme must be at least {username_length} long"
-min_password = f"Password must be at least {password_length} long"
+min_username = f"Useranme must be at least {username_length} characters long"
+min_password = f"Password must be at least {password_length} characters long"
 
 register_keys_valid = ["username", "password"]
 
