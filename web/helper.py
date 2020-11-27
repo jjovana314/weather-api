@@ -248,7 +248,7 @@ def validate_city_and_country(
         main_keys_valid (list): list with valid keys
 
     Raises:
-        KeyError: if city or country that is sent is not valid
+        KeyError: if city or country that was sent is not valid
 
     Returns:
         list with values that we want to send back to user as respond
