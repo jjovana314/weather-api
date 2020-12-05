@@ -7,6 +7,7 @@ from json import dumps, loads
 import bcrypt
 import exceptions
 import exception_messages as ex_m
+import config
 
 
 # status codes
@@ -332,12 +333,13 @@ def user_validation(
         return (
             False, ex.args[0], ex.args[1]
         )
-    password = data.get("admin_pwd", None)
-    if password is None:
+    admin_password = data.get("admin_pwd", None)
+    username = data["username"]
+
+    if admin_password is None:
         # if password is not admin password we assume
         # that it is user's password
         try:
-            username = data["username"]
             password = data["password"]
         except KeyError:
             return (
@@ -346,6 +348,7 @@ def user_validation(
                 DATA_NOT_EXIST
             )
     usr_exist = username_exist(users, username)
+
     # if user needs to be registered in database
     if is_register:
         if usr_exist:
@@ -360,7 +363,11 @@ def user_validation(
                 False, "This user does not exist", INVALID_USERNAME
             )
         # validate password if user does not wants to register
-        valid_pwd = validation_password(users, password, username)
+        if admin_password is None:
+            valid_pwd = validation_password(users, password, username)
+        else:
+            valid_pwd = validation_password(users, admin_password, config.admin_name)
+
         if not valid_pwd:
             return (
                 False, "Please enter valid password", INVALID_PASSWORD
